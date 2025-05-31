@@ -6,6 +6,7 @@ import ProductForm from '@/components/ProductForm';
 import { useAuth } from '@/context/AuthContext';
 import { Category, fetchCategories } from '@/services/categoryService';
 import { Product } from '@/services/productService';
+import CategoryManager from '@/components/CategoryManager';
 
 export default function ProductosPage() {
   const router = useRouter();
@@ -21,16 +22,27 @@ export default function ProductosPage() {
     }
   }, [isAuthenticated, router]);
 
-  useEffect(() => {
+  const refetchCategories = () => {
     if (!token) return;
     fetchCategories(token).then(setCategories).catch(console.error);
+  };
+
+  useEffect(() => {
+    refetchCategories();
   }, [token]);
 
   if (!isAuthenticated) return null;
 
   return (
-    <div className="bg-gray-50 dark:bg-gray-900">
-      <h2 className="text-2xl font-bold mb-4">Listado de Productos</h2>
+    <div className="bg-gray-50 dark:bg-gray-900 p-6 space-y-6">
+      <h2 className="text-2xl font-bold mb-4 text-gray-800 dark:text-gray-100">Listado de Productos</h2>
+
+      <CategoryManager
+        token={token!}
+        initialCategories={categories}
+        onCategoryChange={refetchCategories}
+      />
+
       <ProductForm
         token={token!}
         categories={categories}
@@ -42,6 +54,7 @@ export default function ProductosPage() {
         }}
         onCancelEdit={() => setProductToEdit(null)}
       />
+
       <TableProducts
         token={token}
         key={productsRefreshKey}
